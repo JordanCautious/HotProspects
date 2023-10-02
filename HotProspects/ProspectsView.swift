@@ -12,12 +12,32 @@ struct ProspectsView: View {
         case none, contacted, uncontacted
     }
     
+    @EnvironmentObject var prospects: Prospects
     let filter: FilterType
     
     var body: some View {
         NavigationView {
-            Text("Hello World")
-                .navigationTitle(title)
+            List {
+                ForEach(filteredProspects) { prospect in
+                    VStack(alignment: .leading) {
+                        Text(prospect.name)
+                            .font(.headline)
+                        Text(prospect.emailAddress)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .navigationTitle(title)
+            .toolbar {
+                Button {
+                    let prospect = Prospect()
+                    prospect.name = "Jordan Haynes"
+                    prospect.emailAddress = "Jrh279@miami.edu"
+                    prospects.people.append(prospect)
+                } label: {
+                    Label("Scan", systemImage: "qrcode.viewfinder")
+                }
+            }
         }
     }
     
@@ -31,8 +51,20 @@ struct ProspectsView: View {
             return "Uncontacted People"
         }
     }
+    
+    var filteredProspects: [Prospect] {
+        switch filter {
+        case .none:
+            return prospects.people
+        case .contacted:
+            return prospects.people.filter { $0.isContacted }
+        case .uncontacted:
+            return prospects.people.filter { !$0.isContacted}
+        }
+    }
 }
 
 #Preview {
     ProspectsView(filter: .none)
+        .environmentObject(Prospects())
 }
